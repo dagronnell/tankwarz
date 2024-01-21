@@ -5,6 +5,7 @@ from collision import polygons_collide
 from config import TANK_SPEED, TANK_ROTATION_SPEED
 from projectile import Projectile
 from scene import place_tank
+from seeker import Seeker
 
 
 class Tank:
@@ -98,7 +99,8 @@ class Tank:
         if current_time - self.last_shot_time >= self.shoot_cooldown:
             self.last_shot_time = current_time
             cannon_pos = self.get_cannon_position()
-            return Projectile(cannon_pos, self.angle, self)
+            # return Projectile(cannon_pos, self.angle, self)
+            return Seeker(cannon_pos, self.angle, self, self.other_tank)
         return None
 
     def get_bounding_points(self, position=None):

@@ -1,8 +1,7 @@
 import pygame
 
 from collision import polygons_collide
-from config import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, WALL_MIN_DISTANCE, WALL_COUNT, WALL_LENGTH, \
-    PROJECTILE_MAX_COUNT, PROJECTILE_MAX_MOVE
+from config import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, PROJECTILE_MAX_COUNT, PROJECTILE_MAX_MOVE
 from scene import place_tank
 from tank import Tank
 from wall import create_walls
@@ -91,8 +90,8 @@ while running:
         projectile.move()
         hit_wall = False
         hit_tank = False
+        next_pos = projectile.get_next_position()
         for wall in walls:
-            next_pos = projectile.get_next_position()
             if projectile.get_bounding_rect(next_pos).colliderect(wall.get_rect()):
                 projectile.bounce(wall)
                 hit_wall = True
