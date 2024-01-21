@@ -6,6 +6,7 @@ from config import TANK_SPEED, TANK_ROTATION_SPEED
 from projectile import Projectile
 from scene import place_tank
 from seeker import Seeker
+from bullet import Bullet
 
 
 class Tank:
@@ -95,12 +96,15 @@ class Tank:
             self.angle = old_angle
             return
 
-    def shoot(self, current_time):
+    def shoot(self, current_time, projectile_type):
         if current_time - self.last_shot_time >= self.shoot_cooldown:
             self.last_shot_time = current_time
             cannon_pos = self.get_cannon_position()
-            # return Projectile(cannon_pos, self.angle, self)
-            return Seeker(cannon_pos, self.angle, self, self.other_tank)
+            if projectile_type is Bullet:
+                return Bullet(cannon_pos, self.angle, self)
+            elif projectile_type is Seeker:
+                return Seeker(cannon_pos, self.angle, self, self.other_tank)
+
         return None
 
     def get_bounding_points(self, position=None):

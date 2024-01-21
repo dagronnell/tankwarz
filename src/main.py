@@ -3,8 +3,10 @@ import pygame
 from collision import polygons_collide
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_COLOR, PROJECTILE_MAX_COUNT, PROJECTILE_MAX_MOVE
 from scene import place_tank
+from bullet import Bullet
+from seeker import Seeker
 from tank import Tank
-from wall import create_walls
+from wall import create_walls, Wall
 
 # Initialize pygame
 pygame.init()
@@ -21,7 +23,10 @@ pygame.display.set_caption("Tank Death Match")
 
 # Initialize objects, tanks, walls & projectiles
 walls = create_walls()
-
+# walls = [
+#     Wall((100, 100), (35, 100)),
+#     Wall((100, 100), (100, 35)),
+# ]
 player1_tank = Tank("icons/tank4.png", walls)
 player2_tank = Tank("icons/tank4.png", walls)
 place_tank(player1_tank, walls)
@@ -31,11 +36,15 @@ place_tank(player2_tank, walls)
 
 tanks = [player1_tank, player2_tank]
 
-projectiles = []
+projectiles = [
+    Bullet((152, 152), 315, player1_tank)
+]
+
+
 player1_projectile_count, player2_projectile_count = 0, 0
 
 
-def control_tank(tank, up, down, left, right, fire):
+def control_tank(tank, up, down, left, right, fire, fire2):
     if up or down:
         direction = 1 if up else -1
         tank.move(direction)
@@ -46,11 +55,17 @@ def control_tank(tank, up, down, left, right, fire):
 
     if fire:
         if tank.projectile_count < PROJECTILE_MAX_COUNT:
-            new_projectile = tank.shoot(current_time)
+            new_projectile = tank.shoot(current_time, Bullet)
             if new_projectile:
                 fire_sound.play()
                 projectiles.append(new_projectile)
                 tank.projectile_count += 1
+    if fire2:
+        new_projectile = tank.shoot(current_time, Seeker)
+        if new_projectile:
+            fire_sound.play()
+            projectiles.append(new_projectile)
+            tank.projectile_count += 1
 
 
 # Main game loop
@@ -64,15 +79,18 @@ while running:
 
     # player_tank handling
     keys = pygame.key.get_pressed()
+    # if not keys[pygame.K_p]:
+    #     continue
+
     control_tank(player1_tank,
                  keys[pygame.K_UP], keys[pygame.K_DOWN],
                  keys[pygame.K_LEFT], keys[pygame.K_RIGHT],
-                 keys[pygame.K_SPACE]
+                 keys[pygame.K_SPACE], keys[pygame.K_z]
                  )
     control_tank(player2_tank,
                  keys[pygame.K_w], keys[pygame.K_s],
                  keys[pygame.K_a], keys[pygame.K_d],
-                 keys[pygame.K_1]
+                 keys[pygame.K_1], None
                  )
 
     window.fill(BACKGROUND_COLOR)
@@ -109,6 +127,7 @@ while running:
         if not hit_tank and projectile.move_count < PROJECTILE_MAX_MOVE:
             active_projectiles.append(projectile)
             projectile.draw(window)
+            # projectile.draw_hitbox(window)
         else:
             if projectile.shooter == player1_tank:
                 player1_tank.projectile_count -= 1

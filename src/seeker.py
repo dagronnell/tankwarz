@@ -2,53 +2,45 @@ import math
 
 import pygame
 
-from config import PROJECTILE_SPEED
+from config import SEEKER_SPEED
+from projectile import Projectile
 
 
-class Seeker:
+class Seeker(Projectile):
     def __init__(self, position, angle, shooter, target):
-        self.position = list(position)
-        self.angle = angle
-        self._next_pos = self.get_next_position()
+        super().__init__(position, angle, shooter)
+        self._next_pos = self._calculate_next_pos()
+        self.move()
         self.radius = 2  # Size of the projectile
-        self.shooter = shooter
         self.target = target
-        self.move_count = 0
 
     def get_next_position(self):
-        self._next_pos = (
-            self.position[0] + PROJECTILE_SPEED * math.sin(math.radians(self.angle)),
-            self.position[1] - PROJECTILE_SPEED * math.cos(math.radians(self.angle))
-        )
         return self._next_pos
+
+    def _calculate_next_pos(self):
+        return (
+            self.position[0] + SEEKER_SPEED * math.sin(math.radians(self.angle)),
+            self.position[1] - SEEKER_SPEED * math.cos(math.radians(self.angle))
+        )
 
     def move(self):
         self.position = self._next_pos
-        self.move_count += PROJECTILE_SPEED
-        self.seek()
+        self.move_count += SEEKER_SPEED
+        if self.move_count > 50:
+            self.seek()
+        self._next_pos = self._calculate_next_pos()
 
     def seek(self):
-        angle = self.calculate_angle(self.position, self.target.get_center_pos())
-        self.angle = self.adjust_bullet_angle(self.angle, angle, 5)
+        target_angle = self.calculate_angle(self.position, self.target.get_center_pos())
+        self.angle = self.adjust_bullet_angle(target_angle, 2)
 
-    @staticmethod
-    def adjust_bullet_angle(bullet_angle, target_angle, adjustment_step=1):
-        """
-        Justerar kulas vinkel mot målet.
-
-        :param bullet_angle: Nuvarande vinkel för kulan.
-        :param target_angle: Vinkel mot målet.
-        :param adjustment_step: Hur mycket vinkeln ska justeras per anrop.
-        :return: Justerad vinkel för kulan.
-        """
-        angle_diff = (target_angle - bullet_angle + 360) % 360
+    def adjust_bullet_angle(self, target_angle, adjustment_step=1):
+        angle_diff = (target_angle - self.angle + 360) % 360
 
         if angle_diff <= 180:
-            # Öka vinkeln
-            new_angle = bullet_angle + adjustment_step
+            new_angle = self.angle + adjustment_step
         else:
-            # Minska vinkeln
-            new_angle = bullet_angle - adjustment_step
+            new_angle = self.angle - adjustment_step
 
         return new_angle % 360
 
