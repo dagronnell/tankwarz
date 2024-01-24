@@ -37,7 +37,7 @@ place_tank(player2_tank, walls)
 tanks = [player1_tank, player2_tank]
 
 projectiles = [
-    Bullet((152, 152), 315, player1_tank)
+    # Bullet((152, 152), 315, player1_tank)
 ]
 
 
